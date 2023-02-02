@@ -4,10 +4,10 @@
  */
 
 #include "mbed.h"
+#include "MotCon.h"
 
 
-// Blinking rate in milliseconds
-#define BLINKING_RATE     500ms
+
  // Hi Evan
 
 int main()
@@ -17,24 +17,34 @@ int main()
     DigitalOut motor(D11);
 
 
-    motor = 0;
-    conveyor = 0;
-    ThisThread::sleep_for(5000);
-    motor = 1;
-    ThisThread::sleep_for(2000);
-    conveyor = 1;
-    ThisThread::sleep_for(1000);
-    motor = 0;
-    conveyor = 0;
+    MotCon yaw(A5, A3, A4); //positive = CW; negative = CCW
+    MotCon pitch(A1, A2, A0); //postiive = up; negative = down
 
-    ThisThread::sleep_for(5000);
+    yaw.mot_control(-.5);
+    ThisThread::sleep_for(300);
+    yaw.mot_control(0);
+    pitch.mot_control(-.5);
+    ThisThread::sleep_for(300);
+    pitch.mot_control(0);
+    
 
-    motor = 1;
-    ThisThread::sleep_for(2000);
-    conveyor = 1;
-    ThisThread::sleep_for(1000);
-    motor = 0;
-    conveyor = 0;
-     
+    // motor = 0;
+    // conveyor = 0;
+    // ThisThread::sleep_for(5000);
+    // motor = 1;
+    // ThisThread::sleep_for(2000);
+    // conveyor = 1;
+    // ThisThread::sleep_for(500);
+    // motor = 0;
+    // conveyor = 0;
+
+    // ThisThread::sleep_for(5000);
+
+    // motor = 1;
+    // ThisThread::sleep_for(2000);
+    // conveyor = 1;
+    // ThisThread::sleep_for(500);
+    // motor = 0;
+    // conveyor = 0;   
  
 }
