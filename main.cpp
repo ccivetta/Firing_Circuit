@@ -27,21 +27,16 @@ int main()
             yaw.mot_control(0);
             scanf("%c", &control);
             if (control == 'w' || control == 'W'){
-                pitch.mot_control(.5);
+                pitch.mot_control(.1);
                 ThisThread::sleep_for(300);
             } else if (control == 's' || control == 'S'){
-                pitch.mot_control(-.5);
+                pitch.mot_control(-.1);
                 ThisThread::sleep_for(300);
             } else if (control == 'a' || control == 'A'){
-                yaw.mot_control(-.75);
-                motor = 1;
-                ThisThread::sleep_for(1000);
-                conveyor = 1;
-                ThisThread::sleep_for(500);
-                motor = 0;
-                conveyor = 0;
+                yaw.mot_control(-.1);
+                ThisThread::sleep_for(300);
             } else if (control == 'd' || control == 'D'){
-                yaw.mot_control(.5);
+                yaw.mot_control(.1);
                 ThisThread::sleep_for(300);
             } else {
                 pitch.mot_control(0);
