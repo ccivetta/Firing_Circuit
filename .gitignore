@@ -8,3 +8,5 @@ compile_commands.json
 .clangd
 mbed-os
 motor-driver
+bno055
+resource_files

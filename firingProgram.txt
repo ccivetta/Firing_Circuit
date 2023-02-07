@@ -1,0 +1,45 @@
+/* mbed Microcontroller Library
+ * Copyright (c) 2019 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include "mbed.h"
+#include "MotCon.h"
+#include "BNO055.h"
+
+
+
+ // Hi Evan
+
+int main()
+{
+    // Initialise the digital pin LED1 as an output
+    DigitalOut conveyor(D3);
+    DigitalOut motor(D11);
+
+
+    MotCon yaw(A5, A3, A4); //positive = CW; negative = CCW
+    MotCon pitch(A1, A2, A0); //postiive = up; negative = down
+
+    BNO055 imu(D0,D1);
+
+    motor = 0;
+    conveyor = 0;
+    ThisThread::sleep_for(5000);
+    motor = 1;
+    ThisThread::sleep_for(2000);
+    conveyor = 1;
+    ThisThread::sleep_for(500);
+    motor = 0;
+    conveyor = 0;
+
+    ThisThread::sleep_for(5000);
+
+    motor = 1;
+    ThisThread::sleep_for(2000);
+    conveyor = 1;
+    ThisThread::sleep_for(500);
+    motor = 0;
+    conveyor = 0;   
+ 
+}
