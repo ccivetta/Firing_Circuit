@@ -1,0 +1,116 @@
+/* mbed Microcontroller Library
+ * Copyright (c) 2019 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include "mbed.h"
+#include "MotCon.h"
+#include "BNO055.h"
+
+
+
+int main()
+{
+
+    // Initialise the digital pin LED1 as an output
+    DigitalOut conveyor(D3);
+    DigitalOut motor(D11);
+
+
+    MotCon yaw(A5, A3, A4); //positive = CW; negative = CCW
+    MotCon pitch(A1, A2, A0); //postiive = up; negative = down
+
+    BNO055 imu(D0,D1);  
+    imu.reset();
+
+    imu.setmode(OPERATION_MODE_IMUPLUS); //Set Mode to IMU with relative Heading
+    imu.set_angle_units(RADIANS); // Set Angle Units to radians
+    imu.set_anglerate_units(RAD_PER_SEC); //Set Gyro units to rad/s
+
+    
+    Timer t; 
+    float theta;
+    theta = .52;
+    float phi = .52;
+    imu.get_angles();
+    float uYaw;
+    float uPitch;
+    float dc;
+    float interrYaw;
+    float interrPitch;
+    
+    float oldTime;
+    float time;
+    float oldeYaw;
+    float eYaw;
+    float oldePitch;
+    float ePitch;
+    int i = 1;
+    float derrYaw;
+    float derrPitch;
+
+    float KpYaw = 13;
+    float KiYaw = 16; //19;
+    float KdYaw = 0; //.12;
+
+    float KpPitch;
+    float KiPitch;
+    float KdPitch;
+
+    if (phi >= 0){
+        KpPitch = 4;
+        KiPitch = 100; //60; make bigger 
+        KdPitch = 0;
+    } else {
+        KpPitch = 7;
+        KiPitch = 100; //40;
+        KdPitch = 0;
+    }
+
+
+    t.start();
+    time = 0;
+    imu.get_angles();
+    eYaw = theta - imu.euler.yaw;
+    ePitch = phi - imu.euler.pitch;
+    interrYaw = 0;
+    interrPitch = 0;
+    uYaw = KpYaw*eYaw;
+    uPitch = KpPitch*ePitch;
+    while (t.read()<=15){
+            oldTime = time;
+            time = t.read();
+            imu.get_angles();
+            oldeYaw = eYaw;
+            eYaw = theta - imu.euler.yaw;
+            interrYaw = interrYaw + KpYaw*(time - oldTime)*eYaw;
+            derrYaw = (eYaw-oldeYaw)/(time - oldTime);
+            uYaw = KpYaw*eYaw + interrYaw + KdYaw*derrYaw;
+        if (abs(eYaw) >= .01 && abs(uYaw) >= .12){ 
+            yaw.mot_control(uYaw);
+            printf("Yaw: %f, %f, %f, %f\n", imu.euler.yaw, t.read(), eYaw, uYaw);
+        } else {
+            yaw.mot_control(0);
+        }
+            oldTime = time;
+            time = t.read();
+            imu.get_angles();
+            oldePitch = ePitch;
+            ePitch = phi - imu.euler.pitch;
+            interrPitch = interrPitch + KpPitch*(time - oldTime)*ePitch;
+            derrPitch = (ePitch-oldePitch)/(time - oldTime);
+            uPitch = KpPitch*ePitch + interrPitch + KdPitch*derrPitch;
+       if (abs(ePitch) >= .01 && abs(uPitch) >= .12){
+            pitch.mot_control(uPitch);
+            printf("Pitch: %f, %f, %f\n", imu.euler.pitch, t.read(), ePitch);
+        } else {
+            pitch.mot_control(0);
+        }
+    }
+    yaw.mot_control(0);
+    pitch.mot_control(0);
+    ThisThread::sleep_for(5000);
+    imu.get_angles();
+    printf("Yaw: %f, %f, %f\n", imu.euler.yaw, t.read(), eYaw);
+    printf("Pitch: %f, %f, %f\n", imu.euler.pitch, t.read(), ePitch);
+}

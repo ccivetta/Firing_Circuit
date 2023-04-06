@@ -1,0 +1,64 @@
+/* mbed Microcontroller Library
+ * Copyright (c) 2019 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include "mbed.h"
+#include "MotCon.h"
+#include "BNO055.h"
+
+
+
+int main()
+{
+
+    // Initialise the digital pin LED1 as an output
+    DigitalOut conveyor(D3);
+    DigitalOut motor(D11);
+
+
+    MotCon yaw(A5, A3, A4); //positive = CW; negative = CCW
+    MotCon pitch(A1, A2, A0); //postiive = up; negative = down
+
+    BNO055 imu(D0,D1);  
+    imu.reset();
+
+    imu.setmode(OPERATION_MODE_IMUPLUS); //Set Mode to IMU with relative Heading
+    imu.set_angle_units(RADIANS); // Set Angle Units to radians
+    imu.set_anglerate_units(RAD_PER_SEC); //Set Gyro units to rad/s
+
+    float bufferPitch[50];
+    float bufferGyro[50];
+    float sum = 0;
+    Timer t;
+        // yaw.mot_control(0);
+        // yaw.mot_control(-.3);
+        // ThisThread::sleep_for(1000);
+        // yaw.mot_control(0);
+    t.start();
+        pitch.mot_control(0);
+        ThisThread::sleep_for(1000);
+        pitch.mot_control(.5);
+        t.reset();
+        for (int j = 0; j < 50; j++){
+            imu.get_angles();
+            imu.get_gyro();
+            bufferPitch[j] = imu.euler.pitch;
+            bufferGyro[j] = imu.gyro.y;
+            printf("%f, %f, %f\n", imu.euler.pitch, imu.gyro.y, t.read());
+            ThisThread::sleep_for(10);
+        }
+        pitch.mot_control(0);
+        ThisThread::sleep_for(10000);
+        t.reset();
+        pitch.mot_control(-.5);
+        for (int j = 0; j < 50; j++){
+            imu.get_angles();
+            imu.get_gyro();
+            bufferPitch[j] = imu.euler.pitch;
+            bufferGyro[j] = imu.gyro.y;
+            printf("%f, %f, %f\n", imu.euler.pitch, imu.gyro.y, t.read());
+            ThisThread::sleep_for(10);
+        }
+        pitch.mot_control(0);
+}
